@@ -472,7 +472,7 @@ export default function Game({ digits }: GameProps) {
     ) {
       createToast(
         InvalidGuess,
-        "error",
+        true,
         undefined,
         `Enter a ${digits} digit number`,
         true,

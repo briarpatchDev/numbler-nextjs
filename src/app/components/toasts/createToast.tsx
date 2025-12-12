@@ -4,7 +4,7 @@ import React from "react";
 
 // Types for toast component props
 export interface ToastComponentProps {
-  type: string;
+  isError: boolean;
   title?: string;
   message?: string;
   autoClose: boolean;
@@ -25,7 +25,7 @@ type ToastComponent = React.ComponentType<ToastComponentProps>;
  */
 function createToast(
   Component: ToastComponent,
-  type: string,
+  isError: boolean,
   title?: string,
   message?: string,
   autoClose = true,
@@ -35,7 +35,7 @@ function createToast(
     ({ closeToast }) => {
       return (
         <Component
-          type={type}
+          isError={isError}
           message={message}
           title={title}
           autoClose={autoClose}

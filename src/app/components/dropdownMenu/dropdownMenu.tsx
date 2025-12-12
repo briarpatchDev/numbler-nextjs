@@ -1,21 +1,19 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import styles from "./dropdownMenu.module.css";
-import { useRouter } from "next/navigation";
 import classNames from "classnames";
 
 // A menu item that is a link
 export interface LinkItem {
   type: "link";
-  label: string;
+  label: React.ReactNode;
   href: string;
 }
 // Performs a function when you click on this menu item
 export interface ActionItem {
   type: "action";
-  label: string;
+  label: React.ReactNode;
   onClick: () => void;
 }
 
@@ -36,7 +34,6 @@ export type Item = LinkItem | ActionItem | Decoration;
  *  index - the index we get from the map when creating a menu
  *  parent - a ref to the parent menuItem of this item
  *  siblings - an array ref of the siblings of this item
- *  direction - the direction the menu will face in (affects arrows and keyboard inputs)
  *  parentRef - ref to the button that controls the menu
  * */
 interface MenuItemProps {
@@ -46,13 +43,8 @@ interface MenuItemProps {
   onCloseAndFocus: () => void;
   isParentClosing?: boolean;
   index: number;
-  siblings?: Array<
-    | React.RefObject<HTMLLIElement | null>
-    | React.RefObject<HTMLAnchorElement | null>
-  >;
-  direction?: "right" | "left";
+  siblings?: React.RefObject<HTMLElement | null>[];
   parentRef?: React.RefObject<HTMLElement | null>;
-  style: React.CSSProperties;
 }
 export function Item({
   item,
@@ -63,9 +55,7 @@ export function Item({
   index,
   siblings,
   parentRef,
-  style,
 }: MenuItemProps) {
-  const router = useRouter();
   const [isActive, setIsActive] = useState(false);
 
   //Gives time for closing animation to play
@@ -207,7 +197,6 @@ interface DropdownMenuProps {
   containerRef?: React.RefObject<HTMLElement | null>;
   title?: string;
   buttonStyle?: React.CSSProperties;
-  itemStyle?: React.CSSProperties;
 }
 export default function DropdownMenu({
   label,
@@ -215,10 +204,8 @@ export default function DropdownMenu({
   containerRef,
   title,
   buttonStyle,
-  itemStyle,
 }: DropdownMenuProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [direction, setDirection] = useState<"left" | "right" | undefined>();
   const menuRef = useRef<HTMLUListElement | null>(null);
   const observerRef = useRef<ResizeObserver | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -329,35 +316,15 @@ export default function DropdownMenu({
     }
   }, []);
 
-  const actionableIndexes = menu
-    .map((item, i) => (item.type !== "decoration" ? i : null))
-    .filter((i): i is number => i !== null);
+  const actionableIndexes = useRef(
+    menu
+      .map((item, i) => (item.type !== "decoration" ? i : null))
+      .filter((i): i is number => i !== null)
+  );
 
-  const itemRefs = useRef<
-    Array<
-      | React.RefObject<HTMLLIElement | null>
-      | React.RefObject<HTMLAnchorElement | null>
-    >
-  >([]);
-
-  // Update itemRefs when actionableIndexes changes
-  useEffect(() => {
-    itemRefs.current = menu
-      .map((item) =>
-        item.type === "link"
-          ? React.createRef<HTMLAnchorElement>()
-          : item.type === "action"
-          ? React.createRef<HTMLLIElement>()
-          : null
-      )
-      .filter(
-        (
-          ref
-        ): ref is
-          | React.RefObject<HTMLLIElement | null>
-          | React.RefObject<HTMLAnchorElement | null> => ref !== null
-      );
-  }, [menu]);
+  const itemRefs = useRef(
+    actionableIndexes.current.map(() => React.createRef<HTMLElement>())
+  );
 
   function handleButtonKeydown(e: React.KeyboardEvent<HTMLButtonElement>) {
     if (menuOpen) {
@@ -429,17 +396,15 @@ export default function DropdownMenu({
             return (
               <Item
                 item={item}
-                itemRef={itemRefs.current[actionableIndexes.indexOf(i)]}
+                itemRef={itemRefs.current[actionableIndexes.current.indexOf(i)]}
                 onClose={() => {
                   closeMenu();
                 }}
                 onCloseAndFocus={closeMenuAndFocus}
                 isParentClosing={closing}
-                direction={direction}
-                index={actionableIndexes.indexOf(i)}
+                index={actionableIndexes.current.indexOf(i)}
                 siblings={itemRefs.current}
                 parentRef={buttonRef}
-                style={{ ...itemStyle }}
                 key={i}
               />
             );

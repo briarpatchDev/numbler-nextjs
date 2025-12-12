@@ -7,7 +7,7 @@ import classNames from "classnames";
 import { ToastComponentProps } from "./createToast";
 
 export default function Toast({
-  type,
+  isError,
   message,
   closeFunction,
   title,
@@ -25,8 +25,8 @@ export default function Toast({
   return (
     <div
       className={classNames(styles.invalid_guess_toast)}
-      role="alert"
-      aria-live={type === "error" ? "assertive" : "polite"}
+      role={isError ? "alert" : "status"}
+      aria-live={isError ? "assertive" : "polite"}
       aria-atomic="true"
     >
       <div className={styles.message_container}>

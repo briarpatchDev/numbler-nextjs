@@ -332,7 +332,7 @@ export default function Game() {
     ) {
       createToast(
         InvalidGuess,
-        "error",
+        true,
         undefined,
         `Enter a ${digits.current} digit number`,
         true,
